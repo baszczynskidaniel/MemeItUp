@@ -92,7 +92,7 @@ fun LocalGameScreen(
                     //  .align(Alignment.CenterHorizontally)
                     //.fillMaxWidth(),
                         ,
-                meme = state.currentPlayer.meme
+                meme = state.currentPlayer.meme!!
             )
 
             state.currentPlayer.meme.content.forEachIndexed { index, value ->
@@ -170,60 +170,7 @@ class LocalGameViewModel(
     )
 
     fun onAction(action: LocalGameAction) {
-        when(action) {
 
-            LocalGameAction.ConfirmPlayer -> {
-
-                _state.update {
-                    it.copy(
-                        waitingForPlayer = false,
-                    )
-                }
-            }
-            LocalGameAction.OnConfirmMeme -> {
-
-
-                _state.update {
-                    if(it.round > players.size) {
-                        it.copy(
-                            allPlayersFinished = true
-                        )
-                    } else {
-                        it.copy(
-                            round = it.round + 1,
-                            waitingForPlayer = false,
-                            currentPlayer = players[it.currentPlayer.index + 1],
-                        )
-                    }
-                }
-
-            }
-            is LocalGameAction.OnMemeClear -> {
-                _state.value.currentPlayer.meme.content[action.index] =  _state.value.currentPlayer.meme.content[action.index].copy("")
-
-            }
-            is LocalGameAction.OnMemeContentChange -> {
-                _state.value.currentPlayer.meme.content[action.index] =  _state.value.currentPlayer.meme.content[action.index].copy(action.contentChange)
-            }
-
-            is LocalGameAction.OnPlayersChange -> {
-                jsonPlayers = Json.decodeFromString(savedStateHandle.toRoute<Route.LocalGame>().players)
-                players = jsonPlayers.mapIndexed { index, it ->
-                    Player(
-                        index = index,
-                        name = it
-                    )
-                }
-                _state.update {
-                  it.copy(
-                      round = 1,
-                      currentPlayer = players.first(),
-                      waitingForPlayer = true,
-                      allPlayersFinished = false
-                  )
-                }
-            }
-        }
     }
 }
 
@@ -240,16 +187,8 @@ data class Player(
     val index: Int,
     val name: String,
     val points: Int = 0,
-    val meme: Meme = Meme(
-        "",
-        imageUrl="https://imgflip.com/s/meme/Drake-Hotline-Bling.jpg",
-        author = name,
-        content = mutableStateListOf(
-            MemeTextContent("text 1", 0f, 0.5f, 0.5f, 1f),
-            MemeTextContent("text 2", 0.5f, 1f, 0.5f, 1f),
-        )
+    val meme: Meme? = null
 
-    )
 )
 
 sealed interface LocalGameAction {

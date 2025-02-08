@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -48,13 +49,14 @@ fun MemeImageWithTexts(
 
     BoxWithConstraints (
         modifier = Modifier
-            .background(Color.Red)
+
 
     ) {
 
         val painter = rememberAsyncImagePainter(
             model = meme.imageUrl,
             onSuccess = {
+                println("sucess load image")
                 imageLoadResult =
                     if (it.painter.intrinsicSize.width > 1 && it.painter.intrinsicSize.height > 1) {
                         Result.success(it.painter)
@@ -63,6 +65,7 @@ fun MemeImageWithTexts(
                     }
             },
             onError = {
+                println("error load image")
                 it.result.throwable.printStackTrace()
                 imageLoadResult = Result.failure(it.result.throwable)
             },
@@ -76,13 +79,13 @@ fun MemeImageWithTexts(
                 alignment = Alignment.Center,
                 modifier = modifier
                     .onSizeChanged { size -> imageSize = size }
-                    .background(Color.Green)
+
 
 
             )
         }
 
-        meme.content.forEach { text ->
+        meme.content.forEachIndexed { index, text ->
             val top = text.top * imageSize.height
             val bottom = text.bottom * imageSize.height
             val right = text.right * imageSize.width
@@ -99,9 +102,9 @@ fun MemeImageWithTexts(
                 contentAlignment = Alignment.Center
             ) {
                 AutoResizedText(
-                    text = text.text,
+                    text = if(text.text.isBlank()) "Text ${index + 1}" else text.text,
                     color = Color.Black,
-                    style = MaterialTheme.typography.displayMedium.copy(textAlign = TextAlign.Center),
+                    style = MaterialTheme.typography.displayMedium.copy(textAlign = TextAlign.Center, drawStyle = Stroke(width = 2f)),
 
                     minFontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     modifier = Modifier.fillMaxWidth()

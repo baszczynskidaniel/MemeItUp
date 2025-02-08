@@ -19,17 +19,28 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import org.example.project.core.presentation.ui.AppTheme
+import org.example.project.meme.data.dto.GameStateEnum
+import org.example.project.meme.presentation.create_meme.CreateMemeScreen
+import org.example.project.meme.presentation.create_meme.CreateMemeViewModel
+import org.example.project.meme.presentation.lobby.LobbyScreen
+import org.example.project.meme.presentation.lobby.LobbyViewModel
+import org.example.project.meme.presentation.lobby_name.LobbyNameScreen
+import org.example.project.meme.presentation.lobby_name.LobbyNameViewModel
 import org.example.project.meme.presentation.local_game.LocalGameAction
 import org.example.project.meme.presentation.local_game.LocalGameScreen
 import org.example.project.meme.presentation.local_game.LocalGameViewModel
-import org.example.project.meme.presentation.local_game.Player
 import org.example.project.meme.presentation.menu.MenuScreen
 import org.example.project.meme.presentation.navigation_view_models.PlayersNavigationViewModel
+import org.example.project.meme.presentation.round_end.RoundEndScreen
+import org.example.project.meme.presentation.round_end.RoundEndViewModel
 import org.example.project.meme.presentation.set_game.SetGameScreen
-import org.example.project.meme.presentation.set_game.SetGameState
 import org.example.project.meme.presentation.set_game.SetGameViewModel
+import org.example.project.meme.presentation.vote.VoteScreen
+import org.example.project.meme.presentation.vote.VoteViewModel
+import org.example.project.meme.result.ResultScreen
+import org.example.project.meme.result.ResultState
+import org.example.project.meme.result.ResultViewModel
 import org.example.project.settings.presentation.language.LanguageScreen
-import org.example.project.settings.presentation.language.LanguageState
 import org.example.project.settings.presentation.language.LanguageViewModel
 import org.example.project.settings.presentation.settings_list.SettingsScreen
 import org.example.project.settings.presentation.settings_list.SettingsViewModel
@@ -71,9 +82,99 @@ fun App(
                             onLocal = {
                                 navController.navigate(Route.SetGame)
                             },
-                            onMultiplayer = {},
+                            onMultiplayer = {
+                                navController.navigate(Route.LobbyName)
+                            },
                         )
                     }
+                    composable<Route.LobbyName> {
+                        val viewModel = koinViewModel<LobbyNameViewModel>()
+                        val state = viewModel.state.collectAsState()
+
+                        LobbyNameScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onBack = {
+                                navController.navigate(Route.Menu) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true}
+                                }
+                            },
+                            onConfirmSuccessful = {
+                                navController.navigate(Route.Lobby)
+                            }
+                        )
+                    }
+
+
+                    composable<Route.Lobby> {
+                        val viewModel = koinViewModel<LobbyViewModel>()
+                        val state = viewModel.state.collectAsState()
+                        LobbyScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onBack = {
+                                navController.navigate(Route.LobbyName) {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true}
+                                }
+                            },
+                            onGameStateChange = {
+                                onGameStateChange(it, navController)
+                            },
+                            onDisconnect = {
+                                onDisconnect(navController)
+                            }
+
+                        )
+                    }
+
+                    composable<Route.CreateMeme> {
+                        val viewModel = koinViewModel<CreateMemeViewModel>()
+                        val state = viewModel.state.collectAsStateWithLifecycle()
+                        CreateMemeScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onGameStateChange = {
+                                onGameStateChange(it, navController)
+                            },
+                            onDisconnect = {
+                                onDisconnect(navController)
+                            }
+                        )
+                    }
+
+                    composable<Route.Vote> {
+                        val viewModel = koinViewModel<VoteViewModel>()
+                        val state = viewModel.state.collectAsState()
+                        VoteScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onGameStateChange = {
+                                onGameStateChange(it, navController)
+                            },
+                            onDisconnect = {
+                                onDisconnect(navController)
+                            }
+                        )
+                    }
+                    composable<Route.RoundEnd> {
+                        val viewModel = koinViewModel<ResultViewModel>()
+                        val state = viewModel.state.collectAsState()
+                        ResultScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onGameStateChange = {
+                                onGameStateChange(it, navController)
+                            },
+                            onDisconnect = {
+                                onDisconnect(navController)
+                            }
+                        )
+                    }
+
+
+
+
+
                     composable<Route.Settings> {
                         val viewModel = koinViewModel<SettingsViewModel>()
                         val state = viewModel.state.collectAsState()
@@ -151,6 +252,35 @@ fun App(
                     }
                 }
             }
+        }
+    }
+}
+
+private fun onDisconnect(navController: NavController)
+{
+    navController.navigate(Route.Menu) {
+        popUpTo(navController.graph.startDestinationId) { inclusive = true}
+    }
+}
+
+private fun onGameStateChange(gameState: GameStateEnum, navController: NavController)
+{
+    when(gameState)
+    {
+        GameStateEnum.LOBBY -> navController.navigate(Route.Lobby) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true}
+        }
+        GameStateEnum.PLAY -> navController.navigate(Route.CreateMeme) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true}
+        }
+        GameStateEnum.VOTE -> navController.navigate(Route.Vote) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true}
+        }
+        GameStateEnum.ROUND_END -> navController.navigate(Route.RoundEnd) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true}
+        }
+        GameStateEnum.GAME_END -> {
+
         }
     }
 }

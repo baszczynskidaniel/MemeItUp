@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 
 object PreferenceKeys {
+    val USER_ID = stringPreferencesKey("user_id")
     val DARK_THEME = booleanPreferencesKey("dark_theme")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     val LANGUAGE = stringPreferencesKey("language")

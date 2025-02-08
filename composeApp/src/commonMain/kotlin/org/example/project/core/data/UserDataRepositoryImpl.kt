@@ -27,6 +27,10 @@ class UserDataRepositoryImpl(
         setAppLanguage(language)
         miuPreferencesDataSource.setLanguagePreference(language)
     }
+
+    override suspend fun setUserId(userId: String) {
+        miuPreferencesDataSource.setUserId(userId)
+    }
 }
 
 expect fun setAppLanguage(language: Language)

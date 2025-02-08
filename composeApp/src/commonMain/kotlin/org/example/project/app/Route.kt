@@ -9,7 +9,25 @@ sealed interface Route {
     data object Menu: Route
 
     @Serializable
+    data object Lobby: Route
+
+    @Serializable
+    data object Vote: Route
+
+    @Serializable
+    data object RoundEnd: Route
+
+    @Serializable
+    data object GameEnd: Route
+
+    @Serializable
     data object SetGame: Route
+
+    @Serializable
+    data object CreateMeme: Route
+
+    @Serializable
+    data object LobbyName: Route
 
     @Serializable
     data class LocalGame(val players: String): Route

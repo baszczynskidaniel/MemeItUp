@@ -12,4 +12,5 @@ interface UserDataRepository {
     suspend fun appTheme(isDarkTheme: Boolean)
     suspend fun setDynamicColor(useDynamicColor: Boolean)
     suspend fun changeLanguage(language: Language)
+    suspend fun setUserId(userId: String)
 }

@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 @Immutable
 data class Dimensions(
     val mediumPadding: Dp = 12.dp,
+    val mediumIcon: Dp = 48.dp,
     val smallPadding: Dp = mediumPadding / 2,
     val bigPadding: Dp = mediumPadding * 2,
     val logo: Dp = 196.dp,
@@ -23,7 +24,10 @@ data class Dimensions(
     val bigIconButton: Dp = 72.dp,
     val bigIcon: Dp = 36.dp,
     val maxSurfaceWidth: Dp = 700.dp,
-    val maxButtonWidth: Dp = 480.dp
+    val maxButtonWidth: Dp = 480.dp,
+    val smallItemWidth: Dp = 96.dp,
+    val smallItemHeight: Dp = 64.dp,
+    val smallIcon: Dp = mediumIcon / 4 * 3,
 )
 
 val LocalDimensions = staticCompositionLocalOf { Dimensions() }

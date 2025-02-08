@@ -8,6 +8,8 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.sse.SSE
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -18,8 +20,10 @@ object HttpClientFactory {
         return HttpClient(engine) {
             install(ContentNegotiation) {
                 json(
-                    json = Json{
-                        ignoreUnknownKeys = true
+                    json =  Json {
+                        ignoreUnknownKeys = true // Ignoruje nieznane pola w JSON
+                        isLenient = true // Pozwala na formaty bez ścisłych reguł
+                        encodeDefaults = true // Serializuje domyślne wartości
                     }
                 )
             }
@@ -27,6 +31,11 @@ object HttpClientFactory {
                 socketTimeoutMillis = 20_000L
                 requestTimeoutMillis = 20_000L
             }
+            install(WebSockets)
+
+            install(SSE)
+
+            install(ContentNegotiation) { json() }
             install(Logging) {
                 logger = object : Logger {
                     override fun log(message: String) {
