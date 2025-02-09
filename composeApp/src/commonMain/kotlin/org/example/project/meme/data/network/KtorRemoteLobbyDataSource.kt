@@ -4,6 +4,7 @@ import eu.lepicekmichal.signalrkore.HubConnectionBuilder
 import eu.lepicekmichal.signalrkore.HubConnectionState
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -31,6 +32,7 @@ import org.example.project.meme.data.dto.GameStateVotingDto
 import org.example.project.meme.data.dto.MemeInGameDto
 import org.example.project.meme.data.dto.PlayersDto
 import org.example.project.meme.data.dto.ResultDto
+import org.example.project.meme.data.dto.RulesDto
 import org.example.project.meme.domain.GameSession
 
 private const val BASE_URL: String = "https://localhost:7206"
@@ -180,6 +182,16 @@ class KtorRemoteLobbyDataSource(
                     emit(state.arg1)
                 }
         }
+    }
+    
+    override suspend fun updateRules(rulesDto: RulesDto)
+    {
+        safeCall<Result<RulesDto, DataError.Remote>> {
+            client.post(urlString = "$BASE_URL/api/Lobby/updateRules") {
+
+            }
+        }
+        connection.send("UpdateRules", rulesDto)
     }
 
     override fun getMemeVotingStream(): Flow<MemeInGameDto>

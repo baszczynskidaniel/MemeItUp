@@ -1,16 +1,30 @@
 package org.example.project.meme.presentation.lobby
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,6 +55,128 @@ import org.example.project.meme.data.mappers.toMeme
 import org.example.project.meme.data.network.RemoteLobbyDataSource
 import org.example.project.meme.domain.GameSession
 import org.jetbrains.compose.resources.vectorResource
+
+@Composable
+fun RulesItem(
+    rules: RulesDto,
+    modifier: Modifier = Modifier,
+    onRulesChange: (RulesDto) -> Unit,
+) {
+    ElevatedCard(
+        modifier = modifier
+
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(LocalDimensions.current.mediumPadding)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.smallPadding)
+        ) {
+            Text(
+                text = "Rules",
+                style = MaterialTheme.typography.titleLarge
+            )
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+            Text(
+                "Game mode",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.smallPadding),
+            ) {
+                GameMode.entries.forEach { entry ->
+                    ElevatedFilterChip(
+                        selected = entry == rules.gameMode,
+                        onClick = {
+                            onRulesChange(rules.copy(gameMode = entry))
+                        },
+                        label = {
+                            Text(entry.name)
+                        },
+                        trailingIcon = {
+                            if(rules.gameMode == entry) {
+                                Icon(
+                                    imageVector = AppIcons.DONE,
+                                    null
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+
+
+                ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth().weight(1f, false),
+                    text = "Number of rounds",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = rules.numberOfRounds.toString(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+            }
+            Slider(
+                value = rules.numberOfRounds.toFloat(),
+                onValueChange = {
+                    onRulesChange(rules.copy(numberOfRounds = it.toInt()))
+                },
+                valueRange = 1f..10f,
+                steps = 10,
+
+                )
+            AnimatedVisibility(
+                rules.gameMode == GameMode.FILL_IN_BLANK
+            ) {
+                HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth().weight(1f, false),
+                        text = "Same meme for everyone",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Switch(
+                        checked = rules.sameMemeForEveryone,
+                        onCheckedChange = {
+                            onRulesChange(rules.copy(sameMemeForEveryone = !rules.sameMemeForEveryone))
+                        }
+                    )
+                }
+            }
+            AnimatedVisibility(
+                rules.gameMode == GameMode.FILL_IN_BLANK
+            ) {
+                HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth().weight(1f, false),
+                        text = "Everyone is the judge",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Switch(
+                        checked = rules.everyoneIsTheJudge,
+                        onCheckedChange = {
+                            onRulesChange(rules.copy(everyoneIsTheJudge = !rules.everyoneIsTheJudge))
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun LobbyPlayerItem(
@@ -110,28 +246,43 @@ fun LobbyScreen(
             }
         }
     ) {
+        if(state.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+                ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            state.lobby?.players?.forEach { player ->
 
-        state.lobby?.players?.forEach { player ->
-
-            LobbyPlayerItem(
-                player,
-                isOnThisDevice = state.session?.player?.connectionId == player.connectionId,
+                LobbyPlayerItem(
+                    player,
+                    isOnThisDevice = state.session?.player?.connectionId == player.connectionId,
+                    modifier = modifier
+                        .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                        .fillMaxWidth()
+                )
+            }
+            RulesItem(
+                rules = state.lobby!!.rules,
                 modifier = modifier
                     .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                onRulesChange = {
+                    onAction(LobbyAction.OnRulesChange(it))
+                }
             )
-        }
-        Button(
-            modifier = modifier
-                .widthIn(max =LocalDimensions.current.maxButtonWidth)
-                .fillMaxWidth(),
-            onClick = {
-                onAction(LobbyAction.OnStartGame)
+            Button(
+                modifier = modifier
+                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                    .fillMaxWidth(),
+                onClick = {
+                    onAction(LobbyAction.OnStartGame)
+                }
+            ) {
+                Text("Start game")
             }
-        ) {
-            Text("Start game")
         }
-
     }
 }
 
@@ -145,6 +296,7 @@ data class LobbyState(
 sealed class LobbyAction {
     data object OnStartGame: LobbyAction()
     data object OnBack: LobbyAction()
+    data class OnRulesChange(val rulesChange: RulesDto): LobbyAction()
 }
 
 class LobbyViewModel(
@@ -159,8 +311,13 @@ class LobbyViewModel(
         state.copy(
             lobby = lobby,
             session = session,
-            isLoading = false,
+
         )
+
+    }.onStart {
+        _state.update { it.copy(
+            isLoading = false
+        ) }
     }
     .stateIn(
         viewModelScope,
@@ -179,6 +336,13 @@ class LobbyViewModel(
             LobbyAction.OnStartGame -> {
                 viewModelScope.launch {
                     dataSource.startGame()
+                }
+            }
+
+            is LobbyAction.OnRulesChange -> {
+                viewModelScope.launch {
+                    println("lol")
+                    dataSource.updateRules(action.rulesChange)
                 }
             }
         }
