@@ -41,7 +41,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.core.domain.onError
 import org.example.project.core.domain.onSuccess
+import org.example.project.core.presentation.design_system.MIUCard
 import org.example.project.core.presentation.design_system.MIUCenterSurface
+import org.example.project.core.presentation.design_system.MediumSpacer
 import org.example.project.core.presentation.ui.AppIcons
 import org.example.project.core.presentation.ui.LocalDimensions
 import org.example.project.meme.data.dto.GameStateEnum
@@ -154,10 +156,10 @@ fun CreateMemeScreen(
     MIUCenterSurface(
         //modifier = modifier.blur(if(state.playerStateEnum != PlayerStateEnum.PLAYING) 16.dp else 0.dp),
         title = {
-            Text("Round ${state.gameState.round + 1}/${state.gameState.numberOfRounds}")
+            Text("Round ${state.session?.round}/${state.session?.numberOfRounds}")
         }
     ) {
-        println(state.gameState.players)
+
         if (state.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -165,58 +167,97 @@ fun CreateMemeScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+        }
+        else  if(state.session?.player?.state == PlayerStateEnum.WAITING) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
 
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                state.gameState.players.forEach { player ->
-                    PlayerItem(
-                        player = player,
-                        isOnThisDevice = player.connectionId == state.gameState.callerConnectionId,
-                       // isOnThisDevice = player.connectionId == state.gameState.callerConnectionId
+                    Text("Waiting for: ", style = MaterialTheme.typography.displayMedium)
+                    MediumSpacer()
+                    Text(
+                        state.session.players.filter { it.state == PlayerStateEnum.PLAYING }.map { it.name }.joinToString(", "),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
+
                 }
             }
-            MemeImageWithTexts(
+        }
+        else {
+            MIUCard(
                 modifier = Modifier
-                    .heightIn(max = 400.dp),
-                meme = state.meme
-            )
+                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                    .fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
 
-            state.meme.content.forEachIndexed { index, memeTextContent ->
-                TextField(
+                    ) {
+                    state.session?.players?.forEach { player ->
+                        PlayerItem(
+                            player = player,
+                            isOnThisDevice = player.connectionId == state.session!!.player.connectionId,
+                            // isOnThisDevice = player.connectionId == state.gameState.callerConnectionId
+                        )
+                    }
+                }
+            }
+            MIUCard(
+                modifier = Modifier
+                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                    .fillMaxWidth(),
+            ) {
+                MemeImageWithTexts(
                     modifier = Modifier
-                        .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                        .fillMaxWidth(),
-                    value = memeTextContent.text,
-                    onValueChange = {
-                        onAction(CreateMemeAction.OnMemeContentChange(index, it))
-                    },
-                    placeholder = {
-                        Text(
-                            "Text ${index + 1}"
-                        )
-                    },
-                    label = {
-                        Text(
-                            "Text ${index + 1}"
-                        )
-                    },
-                    trailingIcon = {
-                        if (memeTextContent.text.isNotBlank()) {
-                            IconButton(
-                                onClick = {
-                                    onAction(CreateMemeAction.OnMemeClear(index))
-
-                                }
-                            ) {
-                                Icon(AppIcons.CLEAR, "remove text")
-                            }
-                        }
-                    },
+                        .heightIn(max = 400.dp),
+                    meme = state.meme
                 )
+            }
+            MIUCard(
+                modifier = Modifier
+                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                    .fillMaxWidth(),
+            ) {
+                state.meme.content.forEachIndexed { index, memeTextContent ->
+                    TextField(
+                        modifier = Modifier
+                            .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                            .fillMaxWidth(),
+                        value = memeTextContent.text,
+                        onValueChange = {
+                            onAction(CreateMemeAction.OnMemeContentChange(index, it))
+                        },
+                        placeholder = {
+                            Text(
+                                "Text ${index + 1}"
+                            )
+                        },
+                        label = {
+                            Text(
+                                "Text ${index + 1}"
+                            )
+                        },
+                        trailingIcon = {
+                            if (memeTextContent.text.isNotBlank()) {
+                                IconButton(
+                                    onClick = {
+                                        onAction(CreateMemeAction.OnMemeClear(index))
+
+                                    }
+                                ) {
+                                    Icon(AppIcons.CLEAR, "remove text")
+                                }
+                            }
+                        },
+                    )
+                }
             }
             Button(
                 modifier = Modifier
@@ -230,16 +271,8 @@ fun CreateMemeScreen(
             }
         }
     }
-   // if(state.playerStateEnum != PlayerStateEnum.PLAYING) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxSize(),
-//
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text("Waiting for other players", style = MaterialTheme.typography.displayMedium)
-//        }
-    //}
+
+
 
 
 }
@@ -248,15 +281,6 @@ data class CreateMemeState(
     val isLoading: Boolean = true,
     val meme: Meme = Meme(),
     val session: GameSession? = null,
-
-    val playerStateEnum: PlayerStateEnum = PlayerStateEnum.LOBBY,
-    val gameState: GameStatePlayingDto = GameStatePlayingDto(
-        state = GameStateEnum.LOBBY,
-        numberOfRounds = 0,
-        round = 0,
-        players = emptyList(),
-        callerConnectionId = ""
-    )
 )
 
 sealed interface CreateMemeAction {
@@ -273,27 +297,27 @@ class CreateMemeViewModel(
     private val _state = MutableStateFlow(CreateMemeState())
     private val _session = dataSource.getGameSession()
 
-    val state = combine(_state, _gameState, _session) { state, game, session ->
+
+    val state = combine(_state, _session,) { state, session ->
+
         state.copy(
-            playerStateEnum = game.players.filter { it.connectionId == game.callerConnectionId }.first().state,
-            gameState = game,
-            session = session
+
+
+            session = session,
+
         )
     }.onStart {
         viewModelScope.launch {
-            dataSource.getMemeTemplate()
-                .onSuccess { memeTemplate ->
-                    _state.update { it.copy(
-                        meme = memeTemplate.toMeme(),
-                        isLoading = false,
-                    ) }
-                }
-                .onError {
-                    _state.update { it.copy(
-                        isLoading = false,
-                    ) }
-                }
+            var meme = dataSource.getMeme()
+            _state.update { it.copy(
+                meme = meme.toMeme(),
+                isLoading = false,
+            ) }
         }
+
+
+
+
     }
         .stateIn(
             viewModelScope,
@@ -312,9 +336,9 @@ class CreateMemeViewModel(
                 _state.value.meme.content[action.index] =  _state.value.meme.content[action.index].copy(text = "")
             }
             is CreateMemeAction.OnMemeContentChange -> {
-                println(_state.value)
+
                 _state.value.meme.content[action.index] =  _state.value.meme.content[action.index].copy(text = action.contentChange)
-                println(_state.value)
+
             }
         }
     }

@@ -153,7 +153,9 @@ fun RulesItem(
 
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth().weight(1f, false),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, false),
                     text = "Number of rounds",
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -181,7 +183,9 @@ fun RulesItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        modifier = Modifier.fillMaxWidth().weight(1f, false),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, false),
                         text = "Same meme for everyone",
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -202,7 +206,9 @@ fun RulesItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        modifier = Modifier.fillMaxWidth().weight(1f, false),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, false),
                         text = "Everyone is the judge",
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -217,6 +223,14 @@ fun RulesItem(
         }
     }
 }
+
+@Composable
+fun PlayerItem(
+    modifier: Modifier = Modifier
+) {
+
+}
+
 
 
 @Preview

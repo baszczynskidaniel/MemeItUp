@@ -2,14 +2,20 @@ package org.example.project.meme.result
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,9 +35,15 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import memeitup.composeapp.generated.resources.Res
+import memeitup.composeapp.generated.resources.laptop
+import memeitup.composeapp.generated.resources.smartphone
 import org.example.project.core.domain.onError
 import org.example.project.core.domain.onSuccess
+import org.example.project.core.presentation.design_system.MIUCard
 import org.example.project.core.presentation.design_system.MIUCenterSurface
+import org.example.project.core.presentation.design_system.MIULabel
+import org.example.project.core.presentation.design_system.MIUTopAppBar
 import org.example.project.core.presentation.ui.LocalDimensions
 import org.example.project.meme.data.dto.GameStateEnum
 import org.example.project.meme.data.dto.PlayerDto
@@ -40,6 +53,7 @@ import org.example.project.meme.data.network.KtorRemoteLobbyDataSource
 import org.example.project.meme.domain.GameSession
 import org.example.project.meme.domain.Meme
 import org.example.project.meme.presentation.components.MemeImageWithTexts
+import org.jetbrains.compose.resources.vectorResource
 
 
 @Composable
@@ -51,26 +65,30 @@ fun MemeWithScore(
     isOnThisDevice: Boolean
 ) {
     val contentColor = if(isOnThisDevice) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-    ElevatedCard(
+    MIUCard(
         modifier = modifier,
 
     ) {
-        Column(
-            modifier = Modifier.padding(LocalDimensions.current.mediumPadding),
-            verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
-
+        MemeImageWithTexts(
+            meme = meme,
+            modifier = modifier.fillMaxWidth()
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            MemeImageWithTexts(
-                meme = meme,
-                modifier.fillMaxWidth()
-            )
             Text(
                 "Author: $author",
-                color = contentColor
+                color = contentColor,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.End,
             )
             Text(
                 "Score: $score",
-                color = contentColor
+                color = contentColor,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -108,7 +126,81 @@ fun PlayerResultItem(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlayersResultList(
+    modifier: Modifier = Modifier,
+    players: List<PlayerDto>,
+    deviceConnectionId: String,
+
+) {
+
+    if(players.isNotEmpty()) {
+        val maxPointsLength = players.maxBy { it.score }.toString().length
+        val numberOfPlayers = players.size.toString().length
+        MIUCard(
+            modifier = modifier
+        ) {
+            MIULabel("Players")
+            players.forEachIndexed { index, player ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding)
+                ) {
+                    if(deviceConnectionId == player.connectionId) {
+                        Text(
+                            text = "Place: ${index + 1}".padEnd(numberOfPlayers + 7, ' '),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    } else {
+                        Text(
+                            text = "Place: ${index + 1}".padEnd(numberOfPlayers + 7, ' '),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+                    if(deviceConnectionId == player.connectionId) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            text = "${player.name} (Me)",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    } else {
+                        Text(
+                            player.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                        )
+                    }
+
+                    if(deviceConnectionId == player.connectionId) {
+                        Text(
+                            text = "Points: ${player.score}".padEnd(maxPointsLength + 8, ' '),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    } else {
+                        Text(
+                            text = "Points: ${player.score}".padEnd(maxPointsLength + 8, ' '),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+
+                }
+                if(index < players.size - 1) {
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                }
+            }
+
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ResultScreen(
     state: ResultState,
@@ -128,48 +220,50 @@ fun ResultScreen(
             onDisconnect()
         }
     }
+    Column(
+        modifier = Modifier
 
-    MIUCenterSurface(
-        title = {
-            Text("Round ${state.roundResult?.round} / ${state.roundResult?.numberOfRounds}")
-        }
+            .fillMaxSize()
     ) {
+
+        MIUTopAppBar(
+            title = {
+                Text("Round ${state.roundResult?.round} / ${state.roundResult?.numberOfRounds}")
+            }
+        )
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f, false),
+            modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding)
         ) {
+
+
             Text(
                 "Leaderboard",
                 style = MaterialTheme.typography.titleLarge
             )
-            state.players.fastForEachIndexed { index, player ->
-                PlayerResultItem(
-                    modifier = Modifier
-                        .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                        .fillMaxWidth(),
-                    player = player,
-                    place = index + 1,
-                    isOnThisDevice = player.connectionId == state.session?.player?.connectionId
-                )
-                if (index != state.players.size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                            .fillMaxWidth(),
-                    )
-                }
-            }
-            Text(
-                "Memes",
-                style = MaterialTheme.typography.titleLarge
+            PlayersResultList(
+                modifier = Modifier
+                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                    .fillMaxWidth(),
+                players = state!!.session!!.players,
+                deviceConnectionId = state.session!!.player.connectionId
             )
 
-            state.roundResult?.memes?.sortedByDescending {
+            Text(
+                "Memes",
+                style = MaterialTheme.typography.titleLarge,
+
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
+                horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
+            ) {  state.roundResult?.memes?.sortedByDescending {
                 it.score
             }?.forEachIndexed { index, memeInGame ->
+
                 MemeWithScore(
                     modifier = Modifier
                         .widthIn(max = LocalDimensions.current.maxButtonWidth)
@@ -179,18 +273,20 @@ fun ResultScreen(
                     score = memeInGame.score,
                     isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
                 )
-            }
-        }
-        Button(
-            modifier = Modifier
-                .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                .fillMaxWidth(),
+            } }
 
-            onClick = {
-                onAction(ResultAction.OnNextRound)
+
+            Button(
+                modifier = Modifier
+                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                    .fillMaxWidth(),
+
+                onClick = {
+                    onAction(ResultAction.OnNextRound)
+                }
+            ) {
+                Text("Continue")
             }
-        ) {
-            Text("Continue")
         }
 
 

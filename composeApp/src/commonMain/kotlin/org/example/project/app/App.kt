@@ -267,6 +267,9 @@ private fun onGameStateChange(gameState: GameStateEnum, navController: NavContro
 {
     when(gameState)
     {
+
+
+
         GameStateEnum.LOBBY -> navController.navigate(Route.Lobby) {
             popUpTo(navController.graph.startDestinationId) { inclusive = true}
         }
@@ -282,6 +285,10 @@ private fun onGameStateChange(gameState: GameStateEnum, navController: NavContro
         GameStateEnum.GAME_END -> {
 
         }
+        else -> {
+
+        }
+
     }
 }
 

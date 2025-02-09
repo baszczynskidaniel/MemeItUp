@@ -38,4 +38,5 @@ interface RemoteLobbyDataSource {
     fun getPlayers(): Flow<PlayersDto>
     fun finishReviewResult()
     suspend fun updateRules(rulesDto: RulesDto)
+    suspend fun getMeme(): MemeTemplateDto
 }

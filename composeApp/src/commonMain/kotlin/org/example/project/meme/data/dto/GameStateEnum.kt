@@ -14,5 +14,11 @@ enum class GameStateEnum {
     @SerialName("3")
     ROUND_END,
     @SerialName("4")
-    GAME_END
+    GAME_END,
+    @SerialName("5")
+    UNKNOWN,
+    @SerialName("6")
+    VOTE_CHAR,
+    @SerialName("7")
+    ROUND_END_CHAR
 }

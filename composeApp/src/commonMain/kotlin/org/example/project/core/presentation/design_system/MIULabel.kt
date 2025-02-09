@@ -14,6 +14,8 @@ fun MIULabel(
     Text(
         text,
         style = MaterialTheme.typography.titleLarge,
-        modifier = modifier
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.primary
     )
 }
+

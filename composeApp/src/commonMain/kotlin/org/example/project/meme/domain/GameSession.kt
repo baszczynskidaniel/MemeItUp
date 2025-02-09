@@ -9,5 +9,8 @@ import org.example.project.meme.data.dto.PlayerDto
 data class GameSession(
     val player: PlayerDto,
     val gameState: GameStateEnum,
+    val players: List<PlayerDto>,
+    val round: Int,
+    val numberOfRounds: Int,
     val connectionState: HubConnectionState
 )

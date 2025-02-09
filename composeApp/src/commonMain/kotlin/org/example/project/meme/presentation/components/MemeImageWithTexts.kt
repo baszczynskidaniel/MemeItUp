@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import org.example.project.core.presentation.design_system.AutoResizedText
+import org.example.project.core.presentation.ui.LocalDimensions
 import org.example.project.meme.domain.Meme
 import org.example.project.meme.domain.MemeTextContent
 
@@ -79,9 +82,7 @@ fun MemeImageWithTexts(
                 alignment = Alignment.Center,
                 modifier = modifier
                     .onSizeChanged { size -> imageSize = size }
-
-
-
+                    .clip(RoundedCornerShape(LocalDimensions.current.mediumClip))
             )
         }
 

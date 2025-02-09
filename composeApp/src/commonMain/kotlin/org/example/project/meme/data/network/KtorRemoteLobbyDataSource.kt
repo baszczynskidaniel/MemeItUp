@@ -4,11 +4,12 @@ import eu.lepicekmichal.signalrkore.HubConnectionBuilder
 import eu.lepicekmichal.signalrkore.HubConnectionState
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.request.post
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -16,11 +17,11 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.example.project.core.data.network.safeCall
 import org.example.project.core.domain.DataError
 import org.example.project.core.domain.Result
 import org.example.project.core.domain.UserDataRepository
-import org.example.project.core.domain.onSuccess
 import org.example.project.meme.data.dto.GameSessionDto
 import org.example.project.meme.data.dto.GameStateEnum
 import org.example.project.meme.data.dto.GameStatePlayingDto
@@ -34,6 +35,7 @@ import org.example.project.meme.data.dto.PlayersDto
 import org.example.project.meme.data.dto.ResultDto
 import org.example.project.meme.data.dto.RulesDto
 import org.example.project.meme.domain.GameSession
+import kotlin.reflect.KClass
 
 private const val BASE_URL: String = "https://localhost:7206"
 
@@ -65,18 +67,27 @@ class KtorRemoteLobbyDataSource(
 
     override fun getGameSession(): Flow<GameSession>
     {
-        val gameSessionFlow = flow {
-            connection.on(HubMessages.RECEIVE_GAME_SESSION, paramType1 = GameSessionDto::class)
-                .onStart {connection.send(HubFunctions.SEND_GAME_SESSION_TO_CALLER)}
-                .collect { state ->
-                    emit(state.arg1)
-                }
-        }
+        val gameSessionFlow =
+            flow {
+                connection.on(HubMessages.RECEIVE_GAME_SESSION, paramType1 = GameSessionDto::class)
+                    .onStart {
+
+                        connection.send(HubFunctions.SEND_GAME_SESSION_TO_CALLER)
+                    }
+                    .collect { state ->
+                        println("xddddddduu")
+                        emit(state.arg1)
+                    }
+            }
+
         val connectionStateFlow = connection.connectionState
         return combine(gameSessionFlow, connectionStateFlow) { gameSession, connectionState ->
             GameSession(
                 player = gameSession.player,
                 gameState = gameSession.gameState,
+                players = gameSession.players,
+                round = gameSession.round,
+                numberOfRounds = gameSession.numberOfRounds,
                 connectionState = connectionState,
             )
         }
@@ -89,25 +100,53 @@ class KtorRemoteLobbyDataSource(
                 0,
                 PlayerStateEnum.LOBBY,
 
-            ), GameStateEnum.LOBBY, connectionStateFlow.value))
+            ),
+                players = emptyList(),
+                round = 0,
+                numberOfRounds = 0,
+                gameState = GameStateEnum.UNKNOWN,
+                connectionState = connectionStateFlow.value)
+            )
         }
     }
 
     override fun getLobbyStream(): Flow<LobbyDto> {
+        return getFlowFromSignalR("sendLobby", "ReceiveLobby")
+    }
 
-        if(connection.connectionState.value != HubConnectionState.CONNECTED) {
-            runBlocking {
-                connection.start()
+    private inline fun<reified T: Any> getFlowFromSignalR(
+        sendOn: String,
+        receiveOn: String,
+    ): Flow<T> {
+
+
+        return channelFlow {
+            var hasEmit: Boolean = false
+            var numberOfRequests = 0
+            if (connection.connectionState.value != HubConnectionState.CONNECTED) {
+                runBlocking {
+                    connection.start()
+                }
             }
-        }
-        return flow {
-            connection.on("ReceiveLobby", paramType1 = LobbyDto::class).collect { lobbyDto ->
-                emit(lobbyDto.arg1)
+
+            launch {
+                while(!hasEmit) {
+                    connection.send(sendOn)
+//                    if(numberOfRequests++ > 20)
+//                        connection.stop()
+                    delay(100)
+
+                }
             }
-        }.onStart {
-            connection.send("sendLobby")
+
+            connection.on(receiveOn, paramType1 = T::class).collect { dto ->
+                hasEmit = true
+                send(dto.arg1)
+            }
         }
     }
+
+
 
     override suspend fun close() {
         connection.send("LeaveLobby")
@@ -115,11 +154,16 @@ class KtorRemoteLobbyDataSource(
     }
 
     override suspend fun joinLobby(playerDto: PlayerDto) {
+        println("join lobby")
+        connection.stop()
         if(connection.connectionState.value != HubConnectionState.CONNECTED) {
             runBlocking {
+                println("start connection")
                 connection.start()
+                println("connection going")
             }
         }
+        println("joined")
         connection.send("JoinLobby", playerDto.name, playerDto.isUsingMobileDevice)
     }
 
@@ -139,17 +183,8 @@ class KtorRemoteLobbyDataSource(
     }
 
     override fun receiveGameStatePlaying(): Flow<GameStatePlayingDto> {
-        return flow {
+        return getFlowFromSignalR("BroadcastGameStatePlaying", "BroadcastGameStatePlaying")
 
-            connection.on("BroadcastGameStatePlaying", paramType1 = GameStatePlayingDto::class)
-                .onStart {
-                    connection.send("BroadcastGameStatePlaying")
-
-                }
-                .collect { state ->
-                    emit(state.arg1)
-                }
-        }
     }
 
     override fun getRoundResult(): Flow<ResultDto>
@@ -183,14 +218,20 @@ class KtorRemoteLobbyDataSource(
                 }
         }
     }
+
+    override suspend fun getMeme(): MemeTemplateDto {
+
+        return connection.on("ReceiveMeme", paramType1 = MemeTemplateDto::class)
+            .onStart {
+                connection.send("SendMeme")
+            }
+            .first().arg1
+    }
     
     override suspend fun updateRules(rulesDto: RulesDto)
     {
-        safeCall<Result<RulesDto, DataError.Remote>> {
-            client.post(urlString = "$BASE_URL/api/Lobby/updateRules") {
 
-            }
-        }
+        println(Json.encodeToJsonElement(rulesDto))
         connection.send("UpdateRules", rulesDto)
     }
 
@@ -228,6 +269,7 @@ class KtorRemoteLobbyDataSource(
     }
 
     override suspend fun postMeme(meme: MemeTemplateDto) {
+        println(connection.connectionState.value)
         connection.send("PostMeme", meme)
     }
 
@@ -246,7 +288,12 @@ class KtorRemoteLobbyDataSource(
 
     override suspend fun startGame() {
         connection.start()
-        connection.send("StartGame")
+        try {
+            connection.send("StartGame")
+        } catch (e: Exception) {
+            println("error")
+            println(e.message)
+        }
     }
 
     override suspend fun vote(memeId: String, score: Int)
