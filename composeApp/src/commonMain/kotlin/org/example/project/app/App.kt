@@ -31,12 +31,18 @@ import org.example.project.meme.presentation.local_game.LocalGameScreen
 import org.example.project.meme.presentation.local_game.LocalGameViewModel
 import org.example.project.meme.presentation.menu.MenuScreen
 import org.example.project.meme.presentation.navigation_view_models.PlayersNavigationViewModel
+import org.example.project.meme.presentation.result_char.ResultCharScreen
+import org.example.project.meme.presentation.result_char.ResultCharState
+import org.example.project.meme.presentation.result_char.ResultCharViewModel
 import org.example.project.meme.presentation.round_end.RoundEndScreen
 import org.example.project.meme.presentation.round_end.RoundEndViewModel
 import org.example.project.meme.presentation.set_game.SetGameScreen
 import org.example.project.meme.presentation.set_game.SetGameViewModel
 import org.example.project.meme.presentation.vote.VoteScreen
 import org.example.project.meme.presentation.vote.VoteViewModel
+import org.example.project.meme.presentation.vote_char.VoteCharScreen
+import org.example.project.meme.presentation.vote_char.VoteCharState
+import org.example.project.meme.presentation.vote_char.VoteCharViewModel
 import org.example.project.meme.result.ResultScreen
 import org.example.project.meme.result.ResultState
 import org.example.project.meme.result.ResultViewModel
@@ -226,6 +232,36 @@ fun App(
                         )
                     }
 
+                    composable<Route.ResultChar> {
+                        val viewModel = koinViewModel<ResultCharViewModel>()
+                        val state = viewModel.state.collectAsState()
+                        ResultCharScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onGameStateChange = {
+                                onGameStateChange(it, navController)
+                            },
+                            onDisconnect = {
+                                onDisconnect(navController)
+                            }
+                        )
+                    }
+
+                    composable<Route.VoteChar> {
+                        val viewModel = koinViewModel<VoteCharViewModel>()
+                        val state = viewModel.state.collectAsState()
+                        VoteCharScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
+                            onGameStateChange = {
+                                onGameStateChange(it, navController)
+                            },
+                            onDisconnect = {
+                                onDisconnect(navController)
+                            }
+                        )
+                    }
+
                     composable<Route.LocalGame> {
 
                         val playersViewModel = it.sharedKoinViewModel<PlayersNavigationViewModel>(navController)
@@ -285,10 +321,17 @@ private fun onGameStateChange(gameState: GameStateEnum, navController: NavContro
         GameStateEnum.GAME_END -> {
 
         }
-        else -> {
+
+        GameStateEnum.UNKNOWN -> {
 
         }
+        GameStateEnum.VOTE_CHAR ->  navController.navigate(Route.VoteChar) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true}
+        }
 
+        GameStateEnum.ROUND_END_CHAR ->  navController.navigate(Route.ResultChar) {
+            popUpTo(navController.graph.startDestinationId) { inclusive = true}
+        }
     }
 }
 

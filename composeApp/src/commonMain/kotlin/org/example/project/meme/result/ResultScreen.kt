@@ -1,6 +1,7 @@
 package org.example.project.meme.result
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -8,10 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -44,9 +47,11 @@ import org.example.project.core.presentation.design_system.MIUCard
 import org.example.project.core.presentation.design_system.MIUCenterSurface
 import org.example.project.core.presentation.design_system.MIULabel
 import org.example.project.core.presentation.design_system.MIUTopAppBar
+import org.example.project.core.presentation.design_system.MediumSpacer
 import org.example.project.core.presentation.ui.LocalDimensions
 import org.example.project.meme.data.dto.GameStateEnum
 import org.example.project.meme.data.dto.PlayerDto
+import org.example.project.meme.data.dto.PlayerStateEnum
 import org.example.project.meme.data.dto.ResultDto
 import org.example.project.meme.data.mappers.toMeme
 import org.example.project.meme.data.network.KtorRemoteLobbyDataSource
@@ -62,9 +67,11 @@ fun MemeWithScore(
     meme: Meme,
     score: Int,
     author: String,
-    isOnThisDevice: Boolean
+    isOnThisDevice: Boolean,
+
 ) {
     val contentColor = if(isOnThisDevice) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+
     MIUCard(
         modifier = modifier,
 
@@ -140,7 +147,7 @@ fun PlayersResultList(
         MIUCard(
             modifier = modifier
         ) {
-            MIULabel("Players")
+            MIULabel("Leaderboard")
             players.forEachIndexed { index, player ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -162,7 +169,7 @@ fun PlayersResultList(
 
                     if(deviceConnectionId == player.connectionId) {
                         Text(
-                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            modifier = Modifier.fillMaxWidth().weight(1f, false),
                             text = "${player.name} (Me)",
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.titleMedium
@@ -171,7 +178,7 @@ fun PlayersResultList(
                         Text(
                             player.name,
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            modifier = Modifier.fillMaxWidth().weight(1f, false),
                         )
                     }
 
@@ -194,7 +201,6 @@ fun PlayersResultList(
                     HorizontalDivider(modifier = Modifier.fillMaxWidth())
                 }
             }
-
         }
     }
 }
@@ -220,6 +226,37 @@ fun ResultScreen(
             onDisconnect()
         }
     }
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else  if(state.session?.player?.state == PlayerStateEnum.WAITING) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("Waiting for: ", style = MaterialTheme.typography.displayMedium)
+                MediumSpacer()
+                Text(
+                    state.session.players.filter { it.state == PlayerStateEnum.PLAYING }.map { it.name }.joinToString(", "),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+            }
+        }
+    } else {
     Column(
         modifier = Modifier
 
@@ -232,48 +269,52 @@ fun ResultScreen(
             }
         )
         Column(
-            modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize().verticalScroll(rememberScrollState()),
+            modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding)
         ) {
 
 
-            Text(
-                "Leaderboard",
-                style = MaterialTheme.typography.titleLarge
-            )
+
             PlayersResultList(
                 modifier = Modifier
                     .widthIn(max = LocalDimensions.current.maxButtonWidth)
                     .fillMaxWidth(),
-                players = state!!.session!!.players,
+                players = state!!.session!!.players.sortedByDescending { it.score },
                 deviceConnectionId = state.session!!.player.connectionId
             )
 
-            Text(
-                "Memes",
-                style = MaterialTheme.typography.titleLarge,
 
-            )
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
-                horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
-            ) {  state.roundResult?.memes?.sortedByDescending {
-                it.score
-            }?.forEachIndexed { index, memeInGame ->
+                horizontalArrangement = Arrangement.Center,
 
-                MemeWithScore(
-                    modifier = Modifier
-                        .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                        .fillMaxWidth(),
-                    meme = memeInGame.meme.toMeme(),
-                    author = memeInGame.author.name,
-                    score = memeInGame.score,
-                    isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
-                )
-            } }
+            ) {
+
+
+                state.roundResult?.memes?.sortedByDescending {
+                    it.score
+                }?.forEachIndexed { index, memeInGame ->
+                    Box() {
+                        MemeWithScore(
+                            modifier = Modifier
+                                .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                                .fillMaxWidth(),
+                            meme = memeInGame.meme.toMeme(),
+                            author = memeInGame.author.name,
+                            score = memeInGame.score,
+                            isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
+                        )
+                        if (index < state.roundResult!!.memes!!.size - 1) {
+                            Box(modifier.width(LocalDimensions.current.mediumPadding))
+                        }
+
+                    }
+                }
+            }
 
 
             Button(
@@ -289,7 +330,7 @@ fun ResultScreen(
             }
         }
 
-
+        }
     }
 }
 

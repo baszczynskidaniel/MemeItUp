@@ -15,10 +15,12 @@ import org.example.project.meme.presentation.lobby.LobbyViewModel
 import org.example.project.meme.presentation.lobby_name.LobbyNameViewModel
 import org.example.project.meme.presentation.local_game.LocalGameViewModel
 import org.example.project.meme.presentation.navigation_view_models.PlayersNavigationViewModel
+import org.example.project.meme.presentation.result_char.ResultCharViewModel
 import org.example.project.meme.presentation.round_end.RoundEndViewModel
 import org.example.project.meme.presentation.set_game.SetGameViewModel
 import org.example.project.meme.presentation.vote.VoteState
 import org.example.project.meme.presentation.vote.VoteViewModel
+import org.example.project.meme.presentation.vote_char.VoteCharViewModel
 import org.example.project.meme.result.ResultViewModel
 import org.example.project.settings.data.DataStoreFactory
 import org.example.project.settings.presentation.language.LanguageViewModel
@@ -57,5 +59,8 @@ val sharedModule = module {
     viewModelOf(::CreateMemeViewModel)
     viewModelOf(::VoteViewModel)
     viewModelOf(::RoundEndViewModel)
+
+    viewModelOf(::VoteCharViewModel)
+    viewModelOf(::ResultCharViewModel)
 
 }

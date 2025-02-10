@@ -15,6 +15,7 @@ import org.example.project.meme.data.dto.PlayerStateEnum
 import org.example.project.meme.data.dto.PlayersDto
 import org.example.project.meme.data.dto.ResultDto
 import org.example.project.meme.data.dto.RulesDto
+import org.example.project.meme.data.dto.VoteCharDto
 import org.example.project.meme.domain.GameSession
 
 interface RemoteLobbyDataSource {
@@ -39,4 +40,5 @@ interface RemoteLobbyDataSource {
     fun finishReviewResult()
     suspend fun updateRules(rulesDto: RulesDto)
     suspend fun getMeme(): MemeTemplateDto
+    suspend fun getVoteCharDto(): VoteCharDto
 }

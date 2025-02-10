@@ -142,7 +142,7 @@ fun CreateMemeScreen(
     onDisconnect: () -> Unit
 ) {
     LaunchedEffect(state.session?.gameState) {
-        if(state.session?.gameState == GameStateEnum.VOTE) {
+        if(state.session?.gameState == GameStateEnum.VOTE || state.session?.gameState == GameStateEnum.VOTE_CHAR) {
             onGameStateChange(state.session.gameState)
         }
     }
@@ -176,7 +176,10 @@ fun CreateMemeScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(
-                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text("Waiting for: ", style = MaterialTheme.typography.displayMedium)
                     MediumSpacer()

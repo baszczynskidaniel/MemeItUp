@@ -18,6 +18,12 @@ sealed interface Route {
     data object RoundEnd: Route
 
     @Serializable
+    data object VoteChar: Route
+
+    @Serializable
+    data object ResultChar: Route
+
+    @Serializable
     data object GameEnd: Route
 
     @Serializable

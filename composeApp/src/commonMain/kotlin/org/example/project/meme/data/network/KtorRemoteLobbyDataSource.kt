@@ -34,6 +34,7 @@ import org.example.project.meme.data.dto.MemeInGameDto
 import org.example.project.meme.data.dto.PlayersDto
 import org.example.project.meme.data.dto.ResultDto
 import org.example.project.meme.data.dto.RulesDto
+import org.example.project.meme.data.dto.VoteCharDto
 import org.example.project.meme.domain.GameSession
 import kotlin.reflect.KClass
 
@@ -113,6 +114,13 @@ class KtorRemoteLobbyDataSource(
     override fun getLobbyStream(): Flow<LobbyDto> {
         return getFlowFromSignalR("sendLobby", "ReceiveLobby")
     }
+
+    override suspend fun getVoteCharDto(): VoteCharDto {
+        return getFlowFromSignalR<VoteCharDto>("SendGameStateVotingCharDto", "ReceiveGameStateVotingCharDto").first()
+
+    }
+
+
 
     private inline fun<reified T: Any> getFlowFromSignalR(
         sendOn: String,
