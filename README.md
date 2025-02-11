@@ -1,16 +1,33 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop.
+# MemeItUp
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+A Kotlin Multiplatform game where players place cards with meme text onto a picture.
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Backend
+The backend implementation is available [here](https://github.com/baszczynskidaniel/MemeItUpApi).
 
+## Architecture
+The project follows the **Model-ViewModel-Intent (MVI)** architecture and is built using **Kotlin Multiplatform** for iOS, Android, and Desktop.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)
+## How to Run
 
-inspiration https://poki.com/pl/g/make-it-meme
+### Prerequisites
+- Install [Android Studio](https://developer.android.com/studio)
+
+### Running on Desktop
+1. Open Android Studio
+2. Edit Configurations -> Add New Configuration -> Gradle
+3. In the **Run** section, paste: `composeApp:run`
+4. Run the configuration
+
+### Running on Android
+1. Change the run configuration to **Compose**
+2. Run the app
+
+### Running on iOS
+1. Open the project in **Xcode**
+2. Select a target device
+3. Run the app
+
+---
+Enjoy MemeItUp! 🎉
+
