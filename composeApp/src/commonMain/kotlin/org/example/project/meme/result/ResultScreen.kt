@@ -1,5 +1,6 @@
 package org.example.project.meme.result
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,11 +10,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -169,7 +175,7 @@ fun PlayersResultList(
 
                     if(deviceConnectionId == player.connectionId) {
                         Text(
-                            modifier = Modifier.fillMaxWidth().weight(1f, false),
+                            //modifier = Modifier.fillMaxWidth().weight(1f, false),
                             text = "${player.name} (Me)",
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.titleMedium
@@ -178,7 +184,7 @@ fun PlayersResultList(
                         Text(
                             player.name,
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth().weight(1f, false),
+                           // modifier = Modifier.fillMaxWidth().weight(1f, false),
                         )
                     }
 
@@ -186,12 +192,16 @@ fun PlayersResultList(
                         Text(
                             text = "Points: ${player.score}".padEnd(maxPointsLength + 8, ' '),
                             color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.End
                         )
                     } else {
                         Text(
                             text = "Points: ${player.score}".padEnd(maxPointsLength + 8, ' '),
                             style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.End
                         )
                     }
 
@@ -269,8 +279,8 @@ fun ResultScreen(
             }
         )
         Column(
-            modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize(),
+             //   .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding)
         ) {
@@ -287,35 +297,40 @@ fun ResultScreen(
 
 
 
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
-                horizontalArrangement = Arrangement.Center,
-
+            LazyVerticalStaggeredGrid(
+                modifier = Modifier.fillMaxWidth().weight(1f, false),
+                columns = StaggeredGridCells.FixedSize(LocalDimensions.current.maxButtonWidth),
+                horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
+                verticalItemSpacing = LocalDimensions.current.mediumPadding,
             ) {
-
-
                 state.roundResult?.memes?.sortedByDescending {
                     it.score
                 }?.forEachIndexed { index, memeInGame ->
-                    Box() {
-                        MemeWithScore(
-                            modifier = Modifier
-                                .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                                .fillMaxWidth(),
-                            meme = memeInGame.meme.toMeme(),
-                            author = memeInGame.author.name,
-                            score = memeInGame.score,
-                            isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
-                        )
-                        if (index < state.roundResult!!.memes!!.size - 1) {
-                            Box(modifier.width(LocalDimensions.current.mediumPadding))
-                        }
+                    item {
+                        Box() {
+                            MemeWithScore(
+                                modifier = Modifier
+                                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                                    .fillMaxWidth()
+                                    .border(
+                                        width = if (memeInGame.score > 0) 0.dp else 2.dp,
+                                        shape = CardDefaults.shape,
+                                        color = MaterialTheme.colorScheme.primary
+                                    ),
 
+                                meme = memeInGame.meme.toMeme(),
+                                author = memeInGame.author.name,
+                                score = memeInGame.score,
+                                isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
+                            )
+                            if (index < state.roundResult!!.memes!!.size - 1) {
+                                Box(modifier.size(LocalDimensions.current.mediumPadding))
+                            }
+
+                        }
                     }
                 }
             }
-
 
             Button(
                 modifier = Modifier

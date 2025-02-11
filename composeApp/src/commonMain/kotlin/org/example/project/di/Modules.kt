@@ -5,15 +5,18 @@ import org.example.project.core.data.UserDataRepositoryImpl
 import org.example.project.core.domain.UserDataRepository
 import org.example.project.core.data.datastore.MIUPreferencesDataSource
 import org.example.project.core.data.network.HttpClientFactory
+import org.example.project.meme.data.network.KtorJokeDataSource
 import org.example.project.meme.data.network.KtorRemoteCreateMemeDataSource
 import org.example.project.meme.data.network.KtorRemoteLobbyDataSource
 import org.example.project.meme.data.network.KtorRemoteMemeDataSource
 import org.example.project.meme.data.network.RemoteCreateMemeDataSource
+import org.example.project.meme.data.network.RemoteJokeDataSource
 import org.example.project.meme.data.network.RemoteLobbyDataSource
 import org.example.project.meme.presentation.create_meme.CreateMemeViewModel
 import org.example.project.meme.presentation.lobby.LobbyViewModel
 import org.example.project.meme.presentation.lobby_name.LobbyNameViewModel
 import org.example.project.meme.presentation.local_game.LocalGameViewModel
+import org.example.project.meme.presentation.menu.MenuViewModel
 import org.example.project.meme.presentation.navigation_view_models.PlayersNavigationViewModel
 import org.example.project.meme.presentation.result_char.ResultCharViewModel
 import org.example.project.meme.presentation.round_end.RoundEndViewModel
@@ -44,9 +47,10 @@ val sharedModule = module {
     singleOf(::UserDataRepositoryImpl).bind<UserDataRepository>()
     singleOf(::KtorRemoteLobbyDataSource).bind<RemoteLobbyDataSource>()
     singleOf(::KtorRemoteCreateMemeDataSource).bind<RemoteCreateMemeDataSource>()
-
+    singleOf(::KtorJokeDataSource).bind<RemoteJokeDataSource>()
 
     viewModelOf(::LobbyViewModel)
+    viewModelOf(::MenuViewModel)
 
     viewModelOf(::LobbyNameViewModel)
     viewModelOf(::AppViewModel)

@@ -1,6 +1,7 @@
 package org.example.project.meme.presentation.create_meme
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eu.lepicekmichal.signalrkore.HubConnectionState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -193,13 +196,14 @@ fun CreateMemeScreen(
             }
         }
         else {
+            println(state.meme)
             MIUCard(
                 modifier = Modifier
                     .widthIn(max = LocalDimensions.current.maxButtonWidth)
                     .fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.Center,
 
                     ) {
@@ -219,7 +223,8 @@ fun CreateMemeScreen(
             ) {
                 MemeImageWithTexts(
                     modifier = Modifier
-                        .heightIn(max = 400.dp),
+                        .fillMaxWidth(),
+
                     meme = state.meme
                 )
             }
@@ -284,6 +289,7 @@ data class CreateMemeState(
     val isLoading: Boolean = true,
     val meme: Meme = Meme(),
     val session: GameSession? = null,
+    val enablePostMemeButton: Boolean = true,
 )
 
 sealed interface CreateMemeAction {
@@ -332,7 +338,18 @@ class CreateMemeViewModel(
         when(action) {
             CreateMemeAction.OnConfirmMeme -> {
                 viewModelScope.launch {
-                    dataSource.postMeme(state.value.meme.toMemeTemplateDto())
+                    if(_state.value.enablePostMemeButton) {
+                        _state.update { it.copy(
+                            enablePostMemeButton = false
+                        ) }
+                        dataSource.postMeme(state.value.meme.toMemeTemplateDto())
+                        launch {
+                            delay(1000)
+                            _state.update { it.copy(
+                                enablePostMemeButton = true
+                            ) }
+                        }
+                    }
                 }
             }
             is CreateMemeAction.OnMemeClear -> {

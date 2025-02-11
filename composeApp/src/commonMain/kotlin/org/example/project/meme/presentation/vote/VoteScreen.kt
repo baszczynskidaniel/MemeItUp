@@ -114,7 +114,8 @@ fun VoteScreen(
         } else {
             MemeImageWithTexts(
                 modifier = Modifier
-                    .heightIn(max = 400.dp),
+                    .fillMaxWidth(),
+
                 meme = state.currentMeme
             )
             Row(

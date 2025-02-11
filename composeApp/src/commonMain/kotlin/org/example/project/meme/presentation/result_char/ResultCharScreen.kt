@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -114,8 +117,8 @@ fun ResultCharScreen(
                 }
             )
             Column(
-                modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+                modifier = Modifier.padding(LocalDimensions.current.mediumPadding).fillMaxSize(),
+                    //.verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding)
             ) {
@@ -127,38 +130,43 @@ fun ResultCharScreen(
                     deviceConnectionId = state.session!!.player.connectionId
                 )
 
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
-                    horizontalArrangement = Arrangement.Center,
 
-                    ) {
-
-
+                LazyVerticalStaggeredGrid(
+                    modifier = Modifier.fillMaxWidth().weight(1f, false),
+                    columns = StaggeredGridCells.FixedSize(LocalDimensions.current.maxButtonWidth),
+                    horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
+                    verticalItemSpacing = LocalDimensions.current.mediumPadding,
+                ) {
                     state.roundResult?.memes?.sortedByDescending {
                         it.score
                     }?.forEachIndexed { index, memeInGame ->
-                        Box() {
-                            MemeWithScore(
-                                modifier = Modifier
-                                    .widthIn(max = LocalDimensions.current.maxButtonWidth)
-                                    .fillMaxWidth()
-                                    .border(width = if(memeInGame.score > 0) 0.dp else 2.dp, shape = CardDefaults.shape, color = MaterialTheme.colorScheme.primary)
+                        item {
+                            Box() {
+                                MemeWithScore(
+                                    modifier = Modifier
+                                        .widthIn(max = LocalDimensions.current.maxButtonWidth)
+                                        .fillMaxWidth()
+                                        .border(
+                                            width = if (memeInGame.score > 0) 0.dp else 2.dp,
+                                            shape = CardDefaults.shape,
+                                            color = MaterialTheme.colorScheme.primary
+                                        ),
 
-                                ,
+                                    meme = memeInGame.meme.toMeme(),
+                                    author = memeInGame.author.name,
+                                    score = memeInGame.score,
+                                    isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
+                                )
+                                if (index < state.roundResult!!.memes!!.size - 1) {
+                                    Box(modifier.size(LocalDimensions.current.mediumPadding))
+                                }
 
-                                meme = memeInGame.meme.toMeme(),
-                                author = memeInGame.author.name,
-                                score = memeInGame.score,
-                                isOnThisDevice = memeInGame.author.connectionId == state.session?.player?.connectionId
-                            )
-                            if (index < state.roundResult!!.memes!!.size - 1) {
-                                Box(modifier.width(LocalDimensions.current.mediumPadding))
                             }
-
                         }
                     }
                 }
+
+
                 Button(
                     modifier = Modifier
                         .widthIn(max = LocalDimensions.current.maxButtonWidth)

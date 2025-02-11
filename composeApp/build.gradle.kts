@@ -17,10 +17,10 @@ kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_22)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -80,6 +80,8 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
+
+
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -90,6 +92,8 @@ kotlin {
         }
     }
 }
+
+
 
 android {
     namespace = "org.example.project"
@@ -114,8 +118,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_22
+        targetCompatibility = JavaVersion.VERSION_22
     }
 
 
@@ -129,13 +133,21 @@ dependencies {
 }
 
 compose.desktop {
+
+
     application {
         mainClass = "org.example.project.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.example.project"
+           // packageName = "org.example.project"
+            packageName = "MemeItUp"
             packageVersion = "1.0.0"
+            modules("jdk.unsupported")
+            modules("jdk.unsupported.desktop")
         }
     }
+//    buildTypes.release.proguard {
+//        version.set("7.4.0")
+//    }
 }

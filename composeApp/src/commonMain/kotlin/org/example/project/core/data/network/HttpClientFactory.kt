@@ -3,6 +3,8 @@ package org.example.project.core.data.network
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.basic
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
@@ -32,7 +34,13 @@ object HttpClientFactory {
                 requestTimeoutMillis = 20_000L
             }
             install(WebSockets)
-
+            install(Auth){
+                basic {
+                    credentials {
+                        io.ktor.client.plugins.auth.providers.BasicAuthCredentials("11217391", "60-dayfreetrial")
+                    }
+                }
+            }
             install(SSE)
 
             install(ContentNegotiation) { json() }

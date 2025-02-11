@@ -104,8 +104,16 @@ fun MemeImageWithTexts(
             ) {
                 AutoResizedText(
                     text = if(text.text.isBlank()) "Text ${index + 1}" else text.text,
-                    color = Color.Black,
+                    color = Color.White,
                     style = MaterialTheme.typography.displayMedium.copy(textAlign = TextAlign.Center, drawStyle = Stroke(width = 2f)),
+
+                    minFontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                AutoResizedText(
+                    text = if(text.text.isBlank()) "Text ${index + 1}" else text.text,
+                    color = Color.White,
+                    style = MaterialTheme.typography.displayMedium.copy(textAlign = TextAlign.Center),
 
                     minFontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     modifier = Modifier.fillMaxWidth()

@@ -30,6 +30,7 @@ import org.example.project.meme.presentation.local_game.LocalGameAction
 import org.example.project.meme.presentation.local_game.LocalGameScreen
 import org.example.project.meme.presentation.local_game.LocalGameViewModel
 import org.example.project.meme.presentation.menu.MenuScreen
+import org.example.project.meme.presentation.menu.MenuViewModel
 import org.example.project.meme.presentation.navigation_view_models.PlayersNavigationViewModel
 import org.example.project.meme.presentation.result_char.ResultCharScreen
 import org.example.project.meme.presentation.result_char.ResultCharState
@@ -81,7 +82,12 @@ fun App(
                     startDestination = Route.Menu
                 ) {
                     composable<Route.Menu> {
+                        val viewModel = koinViewModel<MenuViewModel>()
+                        val state = viewModel.state.collectAsState()
+
                         MenuScreen(
+                            state = state.value,
+                            onAction = viewModel::onAction,
                             onSettings = {
                                 navController.navigate(Route.Settings)
                             },

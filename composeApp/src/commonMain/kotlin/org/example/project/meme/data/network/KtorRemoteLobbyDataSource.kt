@@ -38,7 +38,8 @@ import org.example.project.meme.data.dto.VoteCharDto
 import org.example.project.meme.domain.GameSession
 import kotlin.reflect.KClass
 
-private const val BASE_URL: String = "https://localhost:7206"
+//private const val BASE_URL: String = "https://localhost:7206"
+private const val BASE_URL: String = "http://dabadaba-001-site1.qtempurl.com"
 
 object HubMessages {
     const val RECEIVE_GAME_SESSION: String = "ReceiveGameSession"
@@ -62,6 +63,7 @@ class KtorRemoteLobbyDataSource(
                 isLenient = true
                 encodeDefaults = true
             }
+
         }
 
 
@@ -172,6 +174,7 @@ class KtorRemoteLobbyDataSource(
             }
         }
         println("joined")
+        println(connection.connectionState.value)
         connection.send("JoinLobby", playerDto.name, playerDto.isUsingMobileDevice)
     }
 
@@ -231,6 +234,7 @@ class KtorRemoteLobbyDataSource(
 
         return connection.on("ReceiveMeme", paramType1 = MemeTemplateDto::class)
             .onStart {
+
                 connection.send("SendMeme")
             }
             .first().arg1

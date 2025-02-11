@@ -66,35 +66,35 @@ fun RulesItem(
 
         MIULabel("Rules")
         HorizontalDivider(modifier = Modifier.fillMaxWidth())
-        Text(
-            "Game mode",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
-        ) {
-            GameMode.entries.forEach { entry ->
-                ElevatedFilterChip(
-                    selected = entry == rules.gameMode,
-                    onClick = {
-                        onRulesChange(rules.copy(gameMode = entry))
-                    },
-                    label = {
-                        Text(entry.name)
-                    },
-                    trailingIcon = {
-                        if(rules.gameMode == entry) {
-                            Icon(
-                                imageVector = AppIcons.DONE,
-                                null
-                            )
-                        }
-                    }
-                )
-            }
-        }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth())
+//        Text(
+//            "Game mode",
+//            style = MaterialTheme.typography.titleMedium
+//        )
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.spacedBy(LocalDimensions.current.mediumPadding),
+//        ) {
+//            GameMode.entries.forEach { entry ->
+//                ElevatedFilterChip(
+//                    selected = entry == rules.gameMode,
+//                    onClick = {
+//                        onRulesChange(rules.copy(gameMode = entry))
+//                    },
+//                    label = {
+//                        Text(entry.name)
+//                    },
+//                    trailingIcon = {
+//                        if(rules.gameMode == entry) {
+//                            Icon(
+//                                imageVector = AppIcons.DONE,
+//                                null
+//                            )
+//                        }
+//                    }
+//                )
+//            }
+//        }
+//        HorizontalDivider(modifier = Modifier.fillMaxWidth())
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
