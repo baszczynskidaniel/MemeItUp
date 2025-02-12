@@ -53,7 +53,7 @@ The backend of the **MemeItUp** app is designed using **ASP.NET**, providing a r
 
 ### Detail api documentation is here
 
-[here](MemeItUp/open_api_documentation.yaml)
+Swagger yaml file with open api documentation can be found [here](open_api_documentation.yaml)
 
 ### Game hub endpoints (using signalR)
 ![obraz](https://github.com/user-attachments/assets/ed735e1e-366d-4391-a0db-b0cb4ac812cd)
