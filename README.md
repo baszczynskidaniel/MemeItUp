@@ -4,6 +4,26 @@
 
 **MemeItUp** is an engaging online multiplayer game where players create memes by filling in meme pictures with captions. Each round, players are given a random meme template and have a limited amount of time to come up with the funniest caption. Once everyone has submitted their memes, they are displayed one by one, and players vote on their favorites. The most entertaining memes score the most points, and the player with the highest score at the end of the game wins. It's a perfect game for game nights, streams, or just having fun with friends!
 
+## Features!
+
+[Bez nazwy](https://github.com/user-attachments/assets/c197c711-d243-4fc4-ac83-5294650db5bf)
+Meme voting screen
+
+![create_meme](https://github.com/user-attachments/assets/233c100f-29f5-4223-807a-397862614eeb)
+create meme screen
+
+![lobby_screen](https://github.com/user-attachments/assets/147c10ff-8f6b-4871-bd98-f3667edaf8c3)
+Lobby screen
+
+![vote_for_meme](https://github.com/user-attachments/assets/86afc94c-3afc-494b-b691-d874cfd6d600)
+Vote for meme
+
+![settings](https://github.com/user-attachments/assets/fad338d3-315d-4fe2-8e90-3b368d36f270)
+Settings
+
+![mainscren](https://github.com/user-attachments/assets/15a17572-4f85-4249-a0ef-79cde2d4a67e)
+Menu sceen
+
 ### App Backend
 
 The backend of the **MemeItUp** app is designed using **ASP.NET**, providing a robust and scalable framework for handling server-side operations. The app features a game hub built with **SignalR** to facilitate real-time communication between players during gameplay. The database for memes is implemented using **MySQL**, ensuring efficient data storage and retrieval. Additionally, there are HTTP API endpoints for creating, reading, updating, and deleting (CRUD) memes in the game, enabling seamless interaction with the database and smooth gameplay.
