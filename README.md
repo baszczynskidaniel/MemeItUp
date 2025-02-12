@@ -4,9 +4,9 @@
 
 **MemeItUp** is an engaging online multiplayer game where players create memes by filling in meme pictures with captions. Each round, players are given a random meme template and have a limited amount of time to come up with the funniest caption. Once everyone has submitted their memes, they are displayed one by one, and players vote on their favorites. The most entertaining memes score the most points, and the player with the highest score at the end of the game wins. It's a perfect game for game nights, streams, or just having fun with friends!
 
-### Features!
+### Features
 
-[Bez nazwy](https://github.com/user-attachments/assets/c197c711-d243-4fc4-ac83-5294650db5bf)
+![Bez nazwy](https://github.com/user-attachments/assets/c197c711-d243-4fc4-ac83-5294650db5bf)
 
 ### Round resutl
 
@@ -46,10 +46,14 @@ You can get fresh programming joke or start multiplayer game
 
 The backend of the **MemeItUp** app is designed using **ASP.NET**, providing a robust and scalable framework for handling server-side operations. The app features a game hub built with **SignalR** to facilitate real-time communication between players during gameplay. The database for memes is implemented using **MySQL**, ensuring efficient data storage and retrieval. Additionally, there are HTTP API endpoints for creating, reading, updating, and deleting (CRUD) memes in the game, enabling seamless interaction with the database and smooth gameplay.
 
-## Endpoints[Uploading openapi3_0.yaml…]()
+## Endpoints
+
+
 
 
 ### Detail api documentation is here
+
+[here](MemeItUp/open_api_documentation.yaml)
 
 ### Game hub endpoints (using signalR)
 ![obraz](https://github.com/user-attachments/assets/ed735e1e-366d-4391-a0db-b0cb4ac812cd)
