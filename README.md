@@ -7,22 +7,29 @@
 ## Features!
 
 [Bez nazwy](https://github.com/user-attachments/assets/c197c711-d243-4fc4-ac83-5294650db5bf)
-Meme voting screen
+##Round resutl
+See Who is leading and what are the fresh created memes in this game
+
 
 ![create_meme](https://github.com/user-attachments/assets/233c100f-29f5-4223-807a-397862614eeb)
-create meme screen
+##create meme screen
+Fill textfields with your meme context
 
 ![lobby_screen](https://github.com/user-attachments/assets/147c10ff-8f6b-4871-bd98-f3667edaf8c3)
-Lobby screen
+##Lobby screen
+Start game and set game preferences
 
 ![vote_for_meme](https://github.com/user-attachments/assets/86afc94c-3afc-494b-b691-d874cfd6d600)
-Vote for meme
+##Vote for meme
+Judge meme by selecting emoji that best your feelings about this meme
 
 ![settings](https://github.com/user-attachments/assets/fad338d3-315d-4fe2-8e90-3b368d36f270)
-Settings
+##Settings
+Modify app preferences, change app theme or language
 
 ![mainscren](https://github.com/user-attachments/assets/15a17572-4f85-4249-a0ef-79cde2d4a67e)
-Menu sceen
+##Menu sceen
+You can get fresh programming joke or start multiplayer game
 
 ### App Backend
 
